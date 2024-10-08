@@ -1,0 +1,37 @@
+MODULE MainModule
+	PERS robtarget p20:=[[123.61,156.94,178.62],[0.367323,0.741513,-0.346174,0.442036],[-1,0,-1,11],[152.879,9E+09,9E+09,9E+09,9E+09,9E+09]];
+	VAR robtarget p30;
+    VAR num moveCMPT:=0;
+    VAR jointtarget jointpos1;
+    VAR errnum myerrnum;
+    PROC main()
+       ConfL \Off;		
+        MoveL p20, v1000, z50, tool0;
+		p30 := p20;
+		WHILE TRUE DO
+ 			jointpos1 := CalcJointT(p30, tool0 \WObj:=wobj0 \ErrorNumber:=myerrnum);
+
+            IF NOT myerrnum = 0 THEN
+                moveCMPT := 1;
+                TPWrite "Joint jointpos3 can not be reached.";
+
+                TPWrite "jointpos3.robax.rax_1: "+ValToStr(jointpos1.robax.rax_1);
+
+                TPWrite "jointpos3.extax.eax_f"+ValToStr(jointpos1.extax.eax_f);
+
+                MoveL p20, v1000, z50, tool0;    
+                p30 := p20;
+                moveCMPT := 0;
+                    ELSE IF NOT (p30 = p20) THEN
+                        moveCMPT := 1;
+                        MoveL p30, v1000, z50,  tool0;    
+                        moveCMPT := 0;
+               ENDIF
+               
+            ENDIF
+        
+        ENDWHILE
+        ERROR
+            RETRY;
+    ENDPROC
+ENDMODULE
