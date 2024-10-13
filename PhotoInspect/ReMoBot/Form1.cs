@@ -18,8 +18,8 @@ using ABB.Robotics.Controllers.RapidDomain;
 using ABB.Robotics.Controllers.MotionDomain;
 using ABB.Robotics.Controllers.ConfigurationDomain;
 using ABB.Robotics.Controllers.Discovery;
-using ABB.Robotics.Internal;
-using Valve.VR;
+
+
 
 namespace RapidDataBinding
 {
@@ -30,18 +30,15 @@ namespace RapidDataBinding
         
         
 
-        Valve.VR.IVRSystem newvr;
         RapidFunctions Rap;
-        Vive vr;
-
+        
         public Form1()
         {
                         
             InitializeComponent();
  //         createcontroller();               
             listmethod();
-            vr = new Vive(this);
-            Rap = new RapidFunctions(this, vr);
+            Rap = new RapidFunctions(this);
            
 
                 
@@ -77,35 +74,8 @@ namespace RapidDataBinding
         public void UpdateFormFields()
         {
             Control.CheckForIllegalCrossThreadCalls = false;
-            this.Left_Device_ID.Text = vr.DeviceList.Left.ToString();
-            this.Right_Device_ID.Text = vr.DeviceList.Right.ToString();
-            this.HMD_Device_ID.Text = vr.DeviceList.HMD.ToString();
-           
+            
         }
-/*
-        public void ConnectNamedPipes()
-        {
-            // Connect to the Named Pipe Server on the Vive App
-            // The connect function will indefinately wait for the pipe to become available
-            // If that is not acceptable specify a maximum waiting time (in ms)
-
-            pipeStream = new NamedPipeClientStream(".", "MyPipe", PipeDirection.InOut);
-
-            if (!pipeStream.IsConnected)
-            {
-                pipeStream.Connect();
-            }
-
-            if (!pipeStream.IsConnected)    //It thinks it's connected but can't read anything ....
-            {
-                MessageBox.Show("Failed to connect ....");
-                return;
-            }
-
-            //End Named Pipes Connection
-        }
-  
-    */
 
         void OnRowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -200,11 +170,10 @@ namespace RapidDataBinding
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Created By Ryan Mecham and David Sanabria\n"
+            MessageBox.Show("Created By Ryan Mecham\n"
                 + "In collaboration with:\n"
                 + "Professor Dr. Haoyu Wang, CCSU and\n"
-                + "Dr. Biao Zhang, ABB Robotics\n\n" 
-                + "Research Funding Provided by CT Space Grant NASA research grant Summer 2016");
+                + "The University Of Connecticut Masters Of Engineering\n\n");
         }
 
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -220,6 +189,27 @@ namespace RapidDataBinding
 
             if (file.ShowDialog() == DialogResult.OK)
                 this.richTextBox2.SaveFile(file.FileName, RichTextBoxStreamType.PlainText);
+        }
+
+        
+
+        private void btn_ScanCTRLS_Click(object sender, EventArgs e)
+        {
+            ControllerInfoCollection ControllerList = Rap.ScanControllers();
+            ListViewItem item = null;
+            foreach (ControllerInfo controllerInfo in ControllerList)
+            {
+                item = new ListViewItem(controllerInfo.IPAddress.ToString());
+                item.SubItems.Add(controllerInfo.ControllerName);
+                this.listView1.Items.Add(item);
+                item.Tag = controllerInfo;
+                
+            }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            Rap.createcontroller(listView1.SelectedItems[0]);
         }
     }
 
