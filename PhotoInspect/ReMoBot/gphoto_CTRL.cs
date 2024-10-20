@@ -8,12 +8,13 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace RapidDataBinding
+namespace Photogrametry
 {
     
     class gphoto_CTRL
     {
         public Form1 fr;
+        public RapidFunctions Rap;
         private Process WSLproc;
         private bool WSLRunning=false;
         public gphoto_CTRL(Form1 _form1)
@@ -70,6 +71,12 @@ namespace RapidDataBinding
                     process.WaitForExit();
                 }
 
+                // Create a new folder in the Home Directory for this session and go there for capturign
+                WSLproc.StandardInput.WriteLine(@"cd ~/camera/");
+                string now = DateTime.Now.ToString("dd_MM_yy_HH_mm");
+                WSLproc.StandardInput.WriteLine($"mkdir photos_{now}");
+                WSLproc.StandardInput.WriteLine($"cd photos_{now}");
+
             }
             catch(System.Exception ex) 
             {
@@ -86,6 +93,10 @@ namespace RapidDataBinding
             {
                 if (WSLRunning == true)
                 {
+                    if (fr.DeleteFilesOnExit.Checked == true)
+                    {
+                        WSLproc.StandardInput.WriteLine($"sudo gphoto2 --delete-all-files -f={fr.CameraFolder.Text}");
+                    }
                     WSLproc.Kill();
                     WSLproc.Dispose();
                     WSLRunning=false;
@@ -121,6 +132,7 @@ namespace RapidDataBinding
         {
             await Task.Delay(milliseconds);
         }
+       //Read the number of photos on the camera to an integer for determining which files to download
         private int GetCameraCount()
         {
             try
@@ -148,10 +160,7 @@ namespace RapidDataBinding
             int startfiles, endfiles;
             
             // WSLproc.StandardInput.WriteLine("gphoto2 --capture-image-and-download");
-            WSLproc.StandardInput.WriteLine(@"cd ~/camera/");
-            string now = DateTime.Now.ToString("dd_MM_yy_HH_mm");
-            WSLproc.StandardInput.WriteLine($"mkdir photos_{now}");
-            WSLproc.StandardInput.WriteLine($"cd photos_{now}");
+
             startfiles = GetCameraCount();
             for (int i = 0; i < fr.i_Frames; i++)
             {
@@ -161,7 +170,7 @@ namespace RapidDataBinding
             }
             
             WSLproc.StandardInput.WriteLine($"gphoto2 --get-file {startfiles+1}-{startfiles+fr.i_Frames}" );
-            WSLproc.StandardInput.WriteLine($"sudo gphoto2 --delete-all-files -f={fr.CameraFolder.Text}");
+            
 
         }
         

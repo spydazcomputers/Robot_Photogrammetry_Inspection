@@ -8,8 +8,8 @@
     <ProjectGuid>{66767B0A-7D9F-409B-AC6E-4FDE818F2524}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RapidDataBinding</RootNamespace>
-    <AssemblyName>RoboStudioControl</AssemblyName>
+    <RootNamespace>Photogrametry</RootNamespace>
+    <AssemblyName>Photogrametry</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>

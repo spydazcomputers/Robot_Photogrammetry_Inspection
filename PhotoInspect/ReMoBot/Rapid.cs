@@ -1,26 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.IO.Pipes;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Threading;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using ABB.Robotics;
-using ABB.Robotics.Controllers;
-using ABB.Robotics.Controllers.RapidDomain;
-using ABB.Robotics.Controllers.MotionDomain;
-using ABB.Robotics.Controllers.ConfigurationDomain;
+﻿using ABB.Robotics.Controllers;
 using ABB.Robotics.Controllers.Discovery;
+using ABB.Robotics.Controllers.RapidDomain;
+using System;
+using System.Windows.Forms;
 
 
-namespace RapidDataBinding
+namespace Photogrametry
 {
     class RapidFunctions
     {
@@ -35,12 +20,15 @@ namespace RapidDataBinding
         double minimumMove = 5;
 
         public
-       RapidData data5;
+        RapidData data5;
         RapidData data6;
         RapidData data7;
         RapidData data8;
+        RapidData controllerWaiting;
+        
 
         public Form1 fr;
+        public gphoto_CTRL gphoto;
         public decimal waittime = 100;
         string s;
         public string IP;
@@ -51,23 +39,8 @@ namespace RapidDataBinding
             
         }
 
-        //Sub Thread that Run's our Core Functions
-        public void DataCollMain()
-        {
-            try
-            {
-                //createcontroller();
-                
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show("Unexpected error occurred: " + ex.Message);
-                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
-            }
-
-        }
-
         //Controller Scanner
+        //Scan for and add controllers to the list
         public ControllerInfoCollection ScanControllers()
         {
             try
@@ -86,9 +59,9 @@ namespace RapidDataBinding
             }
 
         }
+        
         //Connect to the Robo Studio Controller
-
-        public void createcontroller(ListViewItem CTRLSelect)
+        public void ConnectController(ListViewItem CTRLSelect)
         {
             try
             {
@@ -121,14 +94,16 @@ namespace RapidDataBinding
                 if (controller.OperatingMode == ControllerOperatingMode.Auto)
                 {
                     tasks = controller.Rapid.GetTasks();
+                    tasks[0].ProgramPointerChanged += new EventHandler<ProgramPositionEventArgs>(ProgramPointer_Changed);
                     using (m = Mastership.Request(controller.Rapid))
                     {
                         //Perform operation
-                        tasks[0].ResetProgramPointer();
-                        tasks[0].ProgramPointerChanged += new EventHandler<ProgramPositionEventArgs>(ProgramPointer_Changed);
+                        tasks[0].ResetProgramPointer(); 
                         controller.Rapid.Start();
                     }
-                }
+                    controllerWaiting = controller.Rapid.GetRapidData("T_ROB1", "Module1", "extern_wait");
+                    controllerWaiting.ValueChanged += new EventHandler<DataValueChangedEventArgs>(ControllerWaitCheck);
+                    }
                 else
                 {
                     MessageBox.Show(
@@ -153,23 +128,21 @@ namespace RapidDataBinding
             {
                 //Stop the Send data while loop
                 _run = false;
-                //Wait 500ms for Send Data thread to exit
-              
-                //try to exit the send data loops clean if not abort
                 
-                if (objController != null)
+                if (controller != null)
                 {
-                    if (objController.Rapid.ExecutionStatus ==
+                    if (controller.Rapid.ExecutionStatus ==
                            ABB.Robotics.Controllers.RapidDomain.ExecutionStatus.Running)
                     {
 
                         try
                         {
-                            if (m == null)
-                                m = Mastership.Request(objController.Rapid);
-                            m.ReleaseOnDispose = true;
-                            objController.Rapid.Stop(ABB.Robotics.Controllers.RapidDomain.StopMode.Immediate);
-                            
+                            using (m = Mastership.Request(controller.Rapid))
+                            {
+                                m.ReleaseOnDispose = true;
+                                controller.Rapid.Stop(ABB.Robotics.Controllers.RapidDomain.StopMode.Immediate);
+                                tasks[0].ResetProgramPointer();
+                            }
                            
 
 
@@ -188,10 +161,7 @@ namespace RapidDataBinding
                     }
 
                 }
-                if(m != null)
-                {
-                    m.Release();
-                }
+               
                 
                 
             }
@@ -204,71 +174,43 @@ namespace RapidDataBinding
 
             }
 
+         
         }
-
+        public void Continue()
+        {
+            Bool _waiting = (Bool)controllerWaiting.Value;
+            if (_waiting == true)
+            {
+                //Things to do when robot is waiting 
+                gphoto.CaptureAndDownload();
+                using (m = Mastership.Request(controller.Rapid))
+                {
+                    controllerWaiting.Value = new Bool(false);
+                }
+            }
+        }
        
-                // Data Changed Event Handlers
-        private void data1_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
-
-        private void data2_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
-        private void data3_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
-        private void data4_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
-        private void data5_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
-        private void data6_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
-
-        private void data7_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
-        private void data8_ValueChanged(object sender, DataValueChangedEventArgs e)
-        {
-
-            string str = sender.ToString();
-
-
-        }
+// Event Handlers
         private void ProgramPointer_Changed(object sender, ProgramPositionEventArgs e)
         {
-            fr.LogMessage(tasks[0].ProgramPointer.ToString());
+            //The Below Line Logs the program pointer row for debugging
+            //fr.LogMessage(tasks[0].ProgramPointer.Range.Begin.Row.ToString());
+            Bool _waiting = (Bool)controllerWaiting.Value;
+            if (tasks[0].ProgramPointer.Routine == "ControllerWait" && _waiting == true )
+            {
+                fr.LogMessage("Waiting");
+            }
+        }
+
+        private void ControllerWaitCheck(object sender,DataValueChangedEventArgs e)
+        {
+            Bool _waiting = (Bool)controllerWaiting.Value;
+            if (_waiting == true)
+            {
+                //Things to do when robot is waiting 
+                //gphoto.CaptureAndDownload();
+                                                                             
+            }
         }
         //End Event Handlers
 

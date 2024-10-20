@@ -19,11 +19,11 @@ using ABB.Robotics.Controllers.MotionDomain;
 using ABB.Robotics.Controllers.ConfigurationDomain;
 using ABB.Robotics.Controllers.Discovery;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
-using RapidDataBinding;
+using Photogrametry;
 
 
 
-namespace RapidDataBinding
+namespace Photogrametry
 {
     
       
@@ -40,24 +40,31 @@ namespace RapidDataBinding
         {
                         
             InitializeComponent();
-            listmethod();
+            Listmethod();
             Rap = new RapidFunctions(this);
             gphoto = new gphoto_CTRL(this);
+            // Pass RapidFunctions and gPhoto to each other
+            Rap.gphoto = gphoto;
+            gphoto.Rap = Rap;
+
+            //On Load Conversions
             s_hardwareID = this.hardwareID.Text.ToString();
             i_Frames = ((int)this.Frames.Value);
             i_Interval = ((int)this.Interval.Value);
+            
+            //Set the Running Indicator to Red on Startup
             this.SubRunning.BackColor = System.Drawing.Color.Red;
 
 
         }
 
 
-        public void listmethod()
+        public void Listmethod()
         {
            
 
         }
-        
+        // Log a string to the Log Buffer
         public void LogMessage(string MSG)
         {
             Control.CheckForIllegalCrossThreadCalls = false;
@@ -149,7 +156,7 @@ namespace RapidDataBinding
 
         }
 
-        private void button3_Click_1(object sender, EventArgs e)
+        private void btn_SaveLog_Click(object sender, EventArgs e)
         {
             SaveFileDialog file = new SaveFileDialog();
             file.Filter = "log files (*.log)|*.txt|All files (*.*)|*.*";
@@ -173,9 +180,7 @@ namespace RapidDataBinding
         }
 
        
-
-        
-
+        //Scan For ABB Controllers and Add To List View
         private void btn_ScanCTRLS_Click(object sender, EventArgs e)
         {
             ControllerInfoCollection ControllerList = Rap.ScanControllers();
@@ -188,22 +193,18 @@ namespace RapidDataBinding
                 item.Tag = controllerInfo;
                 this.listView_Controllers.Items.Add(item);
                 
-                
-
-               
-                
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void btn_ConnectCTRL_Click(object sender, EventArgs e)
         {
-            if (btn_CTRL_Connect.Text == "Connect")
+            if (btn_ConnectCTRL.Text == "Connect")
             {
-                Rap.createcontroller(listView_Controllers.SelectedItems[0]);
+                Rap.ConnectController(listView_Controllers.SelectedItems[0]);
                 Rap.controller.Logon(UserInfo.DefaultUser);
                 if (Rap.controller.Connected == true)
                 {
-                    btn_CTRL_Connect.Text = "Disconnect";
+                    btn_ConnectCTRL.Text = "Disconnect";
                     if (Rap.controller.OperatingMode == ControllerOperatingMode.Auto)
                     {
                         Rap.tasks = Rap.controller.Rapid.GetTasks();
@@ -226,13 +227,13 @@ namespace RapidDataBinding
             {
 
 
-                btn_CTRL_Connect.Text = "Connect";
+                btn_ConnectCTRL.Text = "Connect";
             }
 
 
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void WSLClose_Click(object sender, EventArgs e)
         {
              gphoto.WSLClose();
                                        
@@ -250,7 +251,7 @@ namespace RapidDataBinding
 
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        private void btn_Capture_Click(object sender, EventArgs e)
         {
             gphoto.CaptureAndDownload();
         }
@@ -281,12 +282,12 @@ namespace RapidDataBinding
 
         }
 
-        private void button5_Click_2(object sender, EventArgs e)
+        private void btn_WSLStart_Click(object sender, EventArgs e)
         {
             gphoto.WSLStart();
         }
 
-        private void button4_Click_1(object sender, EventArgs e)
+        private void btn_WSLStop_Click(object sender, EventArgs e)
         {
             gphoto.WSLClose();
         }
@@ -314,6 +315,11 @@ namespace RapidDataBinding
         private void btn_StartRAP_Click(object sender, EventArgs e)
         {
             Rap.Start();
+        }
+
+        private void btn_RapContinue_Click(object sender, EventArgs e)
+        {
+            Rap.Continue();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

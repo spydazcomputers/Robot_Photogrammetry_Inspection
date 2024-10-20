@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RapidDataBinding.Properties {
+namespace Photogrametry.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
