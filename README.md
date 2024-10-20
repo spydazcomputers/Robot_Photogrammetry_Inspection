@@ -26,7 +26,7 @@ This repository contains a Windows Form Application that leverages the Windows S
 **Installation**
 
 1. Clone the repository:
-2. git clone <https://github.com/yourusername/your-repo-name.git>
+2. git clone https://github.com/spydazcomputers/Robot_Photogrammetry_Inspection.git
 3. Open the solution in Visual Studio.
 4. Build the solution to restore the necessary packages.
 
