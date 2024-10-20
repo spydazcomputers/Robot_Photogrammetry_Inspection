@@ -27,10 +27,7 @@ namespace RapidDataBinding
         ABB.Robotics.Controllers.Controller objController;
         private NetworkScanner objNetworkWatcher = null;
 
-        ABB.Robotics.Controllers.RapidDomain.RobTarget prev_RobtargetL, new_RobtargetL, prev_RobtargetR, new_RobtargetR;
-        ABB.Robotics.Controllers.RapidDomain.Num _num1;
-        private ABB.Robotics.Controllers.RapidDomain.Task[] tasks = null;
-        Thread oThread, sendRthread, sendLthread;
+        public ABB.Robotics.Controllers.RapidDomain.Task[] tasks = null;
         Mastership m;
         
         private bool _run;
@@ -38,7 +35,7 @@ namespace RapidDataBinding
         double minimumMove = 5;
 
         public
-        RapidData data5;
+       RapidData data5;
         RapidData data6;
         RapidData data7;
         RapidData data8;
@@ -47,7 +44,7 @@ namespace RapidDataBinding
         public decimal waittime = 100;
         string s;
         public string IP;
-        private Controller controller = null;
+        public Controller controller = null;
         public RapidFunctions(Form1 _form1)
         {
             this.fr = _form1;
@@ -101,20 +98,14 @@ namespace RapidDataBinding
                     ControllerInfo controllerInfo = (ControllerInfo)item.Tag;
                     if (controllerInfo.Availability == Availability.Available)
                     {
-                        if (this.controller != null)
-                        {
-                            this.controller.Logoff();
-                            this.controller.Dispose();
-                            this.controller = null;
-                        }
                         this.controller = ControllerFactory.CreateFrom(controllerInfo);
-                        this.controller.Logon(UserInfo.DefaultUser);
                     }
                     else
                     {
                         MessageBox.Show("Selected controller not available.");
                     }
                 }
+                
             }
             catch (System.Exception ex)
             {
@@ -123,63 +114,28 @@ namespace RapidDataBinding
             }
         }
 
-        /// <summary>
-        /// Main Data Collection Loop reads from stdout on the remobot thread and uses the incomming data to create a rob target 
-        /// </summary>
-        public void GetData()
-        {
-            try
-            {
-                //Take Control of the RobotController 
-                m = Mastership.Request(objController.Rapid);
-                if (objController.OperatingMode == ControllerOperatingMode.Auto)
-                {
-                    tasks = objController.Rapid.GetTasks();
-                    fr.LogMessage(tasks[0].Name);
-                    tasks[0].ResetProgramPointer();
-                    
-
-                } else
-                {
-                   
-                    AutoClosingMessageBox.Show("Controller Not in Auto Stop() called", "Controller Status", 5000);
-                    Stop();
-                }
-                //While the program has not been told to stop read from the stream and update the robostudio variables
-                while (_run)
-                {
-                    
-                    //Perform operation 
-                    if (objController.Rapid.ExecutionStatus != ExecutionStatus.Running )
-                        objController.Rapid.Start();
-                   
-                }
-
-            }
-            catch (System.InvalidOperationException ex)
-            {
-                MessageBox.Show("Mastership is held by another client." + ex.Message);
-                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
-                Stop();
-            }
-            catch (System.Exception ex)
-            {
-                AutoClosingMessageBox.Show("Unexpected error occurred: " + ex.Message + ex.TargetSite, "LMS", 5000);
-                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
-                Stop();
-            }
-
-        }
-        //Start The Show
         public void Start()
         {
             try
             {
-                _run = true;
-                oThread = new Thread(new ThreadStart(this.DataCollMain));
-                oThread.Name = "Data Coll";
-                oThread.Start();
+                if (controller.OperatingMode == ControllerOperatingMode.Auto)
+                {
+                    tasks = controller.Rapid.GetTasks();
+                    using (m = Mastership.Request(controller.Rapid))
+                    {
+                        //Perform operation
+                        tasks[0].ResetProgramPointer();
+                        tasks[0].ProgramPointerChanged += new EventHandler<ProgramPositionEventArgs>(ProgramPointer_Changed);
+                        controller.Rapid.Start();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Automatic mode is required to start execution from a remote client.");
 
+
+                }
             }
             catch (System.Exception ex)
             {
@@ -189,32 +145,7 @@ namespace RapidDataBinding
 
         }
 
-        public void CheckForPose()
-        {
-
-
-
-            data6 = objController.Rapid.GetTask("T_ROB_L").GetModule("MainModule").GetRapidData("moveCMPTL");
-            data6.ValueChanged += new EventHandler<DataValueChangedEventArgs>(data6_ValueChanged);
-            ABB.Robotics.Controllers.RapidDomain.Num _num1;
-            _num1 = (ABB.Robotics.Controllers.RapidDomain.Num)data6.Value;
-            double moveCMPTL = _num1;
-
-            data5 = objController.Rapid.GetTask("T_ROB_R").GetModule("MainModule").GetRapidData("moveCMPTR");
-            data5.ValueChanged += new EventHandler<DataValueChangedEventArgs>(data5_ValueChanged);
-            ABB.Robotics.Controllers.RapidDomain.Num _num2;
-            _num2 = (ABB.Robotics.Controllers.RapidDomain.Num)data5.Value;
-            double moveCMPTR = _num2;
-
-            
-//            int wait = Convert.ToInt16(waittime);
-//            Thread.Sleep(wait);
-
-
-
-
-        }
-
+        
         //Stop Everything
         public void Stop()
         {
@@ -223,7 +154,7 @@ namespace RapidDataBinding
                 //Stop the Send data while loop
                 _run = false;
                 //Wait 500ms for Send Data thread to exit
-                Thread.Sleep(500);
+              
                 //try to exit the send data loops clean if not abort
                 
                 if (objController != null)
@@ -242,8 +173,6 @@ namespace RapidDataBinding
                            
 
 
-                            if (oThread != null && oThread.IsAlive && Thread.CurrentThread.Name != "Data Coll")
-                                oThread.Abort();
                         }
                         catch (System.InvalidOperationException ex)
                         {
@@ -336,6 +265,10 @@ namespace RapidDataBinding
             string str = sender.ToString();
 
 
+        }
+        private void ProgramPointer_Changed(object sender, ProgramPositionEventArgs e)
+        {
+            fr.LogMessage(tasks[0].ProgramPointer.ToString());
         }
         //End Event Handlers
 

@@ -18,6 +18,8 @@ using ABB.Robotics.Controllers.RapidDomain;
 using ABB.Robotics.Controllers.MotionDomain;
 using ABB.Robotics.Controllers.ConfigurationDomain;
 using ABB.Robotics.Controllers.Discovery;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+using RapidDataBinding;
 
 
 
@@ -31,19 +33,22 @@ namespace RapidDataBinding
         
 
         RapidFunctions Rap;
-        
+        gphoto_CTRL gphoto;
+        public string s_hardwareID;
+        public int i_Frames, i_Interval;
         public Form1()
         {
                         
             InitializeComponent();
- //         createcontroller();               
             listmethod();
             Rap = new RapidFunctions(this);
-           
+            gphoto = new gphoto_CTRL(this);
+            s_hardwareID = this.hardwareID.Text.ToString();
+            i_Frames = ((int)this.Frames.Value);
+            i_Interval = ((int)this.Interval.Value);
+            this.SubRunning.BackColor = System.Drawing.Color.Red;
 
-                
 
-           
         }
 
 
@@ -62,15 +67,7 @@ namespace RapidDataBinding
             this.richTextBox1.ScrollToCaret();
            
         }
-        public void LogMessage2(string MSG)
-        {
-            Control.CheckForIllegalCrossThreadCalls = false;
-            this.richTextBox2.AppendText(DateTime.Now.ToString() + ":   ");
-            this.richTextBox2.AppendText(MSG);
-            this.richTextBox2.AppendText("\n\r");
-            this.richTextBox2.ScrollToCaret();
-
-        }
+        
         public void UpdateFormFields()
         {
             Control.CheckForIllegalCrossThreadCalls = false;
@@ -102,13 +99,7 @@ namespace RapidDataBinding
             this.richTextBox1.Text = msg;
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            this.richTextBox1.Enabled = false;
-            this.richTextBox1.ReadOnly = false;
-            Rap.IP = this.IP1.Text.ToString() + '.' + this.IP2.Text.ToString() + '.' + IP3.Text.ToString() + '.' + ip4.Text.ToString();
-            Rap.Start();
-        }
+        
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -181,15 +172,7 @@ namespace RapidDataBinding
 
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog file = new SaveFileDialog();
-            file.Filter = "log files (*.log)|*.txt|All files (*.*)|*.*";
-            file.DefaultExt = ".log";
-
-            if (file.ShowDialog() == DialogResult.OK)
-                this.richTextBox2.SaveFile(file.FileName, RichTextBoxStreamType.PlainText);
-        }
+       
 
         
 
@@ -197,19 +180,145 @@ namespace RapidDataBinding
         {
             ControllerInfoCollection ControllerList = Rap.ScanControllers();
             ListViewItem item = null;
+            this.listView_Controllers.Items.Clear();
             foreach (ControllerInfo controllerInfo in ControllerList)
             {
                 item = new ListViewItem(controllerInfo.IPAddress.ToString());
                 item.SubItems.Add(controllerInfo.ControllerName);
-                this.listView1.Items.Add(item);
                 item.Tag = controllerInfo;
+                this.listView_Controllers.Items.Add(item);
+                
+                
+
+               
                 
             }
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            Rap.createcontroller(listView1.SelectedItems[0]);
+            if (btn_CTRL_Connect.Text == "Connect")
+            {
+                Rap.createcontroller(listView_Controllers.SelectedItems[0]);
+                Rap.controller.Logon(UserInfo.DefaultUser);
+                if (Rap.controller.Connected == true)
+                {
+                    btn_CTRL_Connect.Text = "Disconnect";
+                    if (Rap.controller.OperatingMode == ControllerOperatingMode.Auto)
+                    {
+                        Rap.tasks = Rap.controller.Rapid.GetTasks();
+                       
+                      //  Rap.tasks[0].Stop();
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            "Automatic mode is required to start execution from a remote client.");
+                    }
+                }
+                else
+                {
+                    LogMessage("Connect Failed");
+                }
+
+            }
+            else
+            {
+
+
+                btn_CTRL_Connect.Text = "Connect";
+            }
+
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+             gphoto.WSLClose();
+                                       
+        }
+
+        private void button5_Click_1(object sender, EventArgs e)
+        {
+            gphoto.WSLStart();
+        }
+
+        private void hardwareID_TextChanged(object sender, EventArgs e)
+        {
+            s_hardwareID = hardwareID.Text.ToString();
+
+
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            gphoto.CaptureAndDownload();
+        }
+
+        private void Interval_ValueChanged(object sender, EventArgs e)
+        {
+            i_Interval = ((int)this.Interval.Value);
+        }
+
+        private void Frames_ValueChanged(object sender, EventArgs e)
+        {
+            i_Frames = ((int)this.Frames.Value);
+        }
+        //Show instructions for finding and binding the USB id of the camera must be run as administrator
+        private void cameraHardwareIDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("" +
+               "run CMD as administrator, execute the following \n" +
+               "usbipd --list \n" +
+               "usbipd bind --hardware-id {hardwareID of camera} \n" +
+               "Copy and paste Hardware id to this box \n" +
+               "Note: this will persist across reboots if you want to unbind run \n" +
+               "      usbipd unbind --all");
+        }
+
+        private void groupBox3_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button5_Click_2(object sender, EventArgs e)
+        {
+            gphoto.WSLStart();
+        }
+
+        private void button4_Click_1(object sender, EventArgs e)
+        {
+            gphoto.WSLClose();
+        }
+
+        private void CameraFolder_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void btn_StopRapClick_1(object sender, EventArgs e)
+        {
+            Rap.Stop();
+        }
+
+        private void btn_StartRAP_Click(object sender, EventArgs e)
+        {
+            Rap.Start();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            gphoto.WSLClose();
         }
     }
 
@@ -245,4 +354,5 @@ public class AutoClosingMessageBox
     static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
     static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+
 }
