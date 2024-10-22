@@ -235,13 +235,13 @@ namespace Photogrametry
 
         private void WSLClose_Click(object sender, EventArgs e)
         {
-             gphoto.WSLClose();
+             gphoto.SubSystemStop();
                                        
         }
 
         private void button5_Click_1(object sender, EventArgs e)
         {
-            gphoto.WSLStart();
+            gphoto.SubSystemStart();
         }
 
         private void hardwareID_TextChanged(object sender, EventArgs e)
@@ -284,12 +284,12 @@ namespace Photogrametry
 
         private void btn_WSLStart_Click(object sender, EventArgs e)
         {
-            gphoto.WSLStart();
+            gphoto.SubSystemStart();
         }
 
         private void btn_WSLStop_Click(object sender, EventArgs e)
         {
-            gphoto.WSLClose();
+            gphoto.SubSystemStop();
         }
 
         private void CameraFolder_TextChanged(object sender, EventArgs e)
@@ -322,9 +322,39 @@ namespace Photogrametry
             Rap.Continue();
         }
 
+        private void lbl_WSLStatus_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SubRunning_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            gphoto.SSHStart();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            gphoto.GetCameraCount();
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            gphoto.SSHEnd();
+        }
+
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            gphoto.WSLClose();
+            gphoto.SubSystemStop();
         }
     }
 
