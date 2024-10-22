@@ -1,39 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.IO.Pipes;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Threading;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using ABB.Robotics;
+﻿#define useSSH
+//#defin useWSL
 using ABB.Robotics.Controllers;
-using ABB.Robotics.Controllers.RapidDomain;
-using ABB.Robotics.Controllers.MotionDomain;
-using ABB.Robotics.Controllers.ConfigurationDomain;
-using ABB.Robotics.Controllers.Discovery;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
-using Photogrametry;
+using System;
+using System.Windows.Forms;
+
 
 
 
 namespace Photogrametry
 {
-    
-      
+
+
     public partial class Form1 : Form
     {
         
         
 
         RapidFunctions Rap;
-        gphoto_CTRL gphoto;
+
+        // Create the correct version of gphoto library connection
+#if useWSL
+       gphoto_WSL gphoto;
+#elif useSSH
+        gphoto_SSH gphoto;
+#endif
+
         public string s_hardwareID;
         public int i_Frames, i_Interval;
         public Form1()
@@ -42,7 +33,14 @@ namespace Photogrametry
             InitializeComponent();
             Listmethod();
             Rap = new RapidFunctions(this);
-            gphoto = new gphoto_CTRL(this);
+
+// Load the Correct Photo Library
+#if useWSL
+            gphoto = new gphoto_WSL(this);
+#elif useSSH
+            gphoto = new gphoto_SSH(this);
+#endif
+
             // Pass RapidFunctions and gPhoto to each other
             Rap.gphoto = gphoto;
             gphoto.Rap = Rap;
@@ -350,6 +348,11 @@ namespace Photogrametry
         private void button3_Click_1(object sender, EventArgs e)
         {
             gphoto.SSHEnd();
+        }
+
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
+
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

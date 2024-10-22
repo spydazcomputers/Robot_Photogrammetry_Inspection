@@ -14,7 +14,7 @@ using System.Windows.Forms;
 namespace Photogrametry
 {
     
-    class gphoto_CTRL
+    class gphoto_WSL
     {
         public Form1 fr;
         public RapidFunctions Rap;
@@ -22,7 +22,7 @@ namespace Photogrametry
         private bool WSLRunning=false;
         private SshClient sshCLI;
         private ShellStream sshStream;
-        public gphoto_CTRL(Form1 _form1)
+        public gphoto_WSL(Form1 _form1)
         {
             this.fr = _form1;
 
@@ -34,8 +34,6 @@ namespace Photogrametry
             try
             {
 
-            if (fr.chk_UseWSL.Checked)
-                {
                     WSLproc = new Process
                     {
                         StartInfo = new ProcessStartInfo
@@ -80,19 +78,7 @@ namespace Photogrametry
                     string now = DateTime.Now.ToString("dd_MM_yy_HH_mm");
                     WSLproc.StandardInput.WriteLine($"mkdir photos_{now}");
                     WSLproc.StandardInput.WriteLine($"cd photos_{now}");
-                }
-                else
-                {
-                    SSHStart();
-                    sshStream = sshCLI.CreateShellStream("input", 0, 0, 0, 0, 1000000);
-                 // Create a new folder in the Home Directory for this session and go there for capturing
-                 
-                    SSHWrite("mkdir camera");
-                    SSHWrite("cd camera");
-                    string now = DateTime.Now.ToString("dd_MM_yy_HH_mm");
-                    SSHWrite($"mkdir photos_{now}");
-                    SSHWrite($"cd photos_{now}");
-                }
+               
             }
             catch(System.Exception ex) 
             {
@@ -107,8 +93,6 @@ namespace Photogrametry
         {
             try
             {
-                if(fr.chk_UseWSL.Checked)
-                {
                     if (WSLRunning == true)
                     {
                         if (fr.DeleteFilesOnExit.Checked == true)
@@ -138,11 +122,6 @@ namespace Photogrametry
                         process.WaitForExit();
 
                     }
-                }
-                else
-                {
-                    SSHEnd();
-                }
                 
                 
             }
@@ -163,15 +142,8 @@ namespace Photogrametry
             try
             {
                 string Camera_Response;
-                if (fr.chk_UseWSL.Checked)
-                {
                     WSLproc.StandardInput.WriteLine($"gphoto2 --num-files -f={fr.CameraFolder.Text}");
                     Camera_Response = WSLproc.StandardOutput.ReadLine();
-                }
-                else
-                {
-                    Camera_Response = SSHWrite($"gphoto2 --num-files -f={fr.CameraFolder.Text}");
-                }
                 Match match = Regex.Match(Camera_Response, @"\d+$");
                 if (match.Success)
                 {
@@ -196,80 +168,13 @@ namespace Photogrametry
             startfiles = GetCameraCount();
             for (int i = 0; i < fr.i_Frames; i++)
             {
-                if (fr.chk_UseWSL.Checked)
-                {
                     WSLproc.StandardInput.WriteLine($"gphoto2 --trigger-capture");
-                }
-                else
-                {
-                    SSHWrite($"gphoto2 --trigger-capture");
-                }
-                   
-                await WaitSeconds(fr.i_Interval);
-                //fr.LogMessage(WSLproc.StandardOutput.ReadToEnd());
+                    await WaitSeconds(fr.i_Interval);
+             
             }
-            if (fr.chk_UseWSL.Checked)
-            {
                 WSLproc.StandardInput.WriteLine($"gphoto2 --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
-            }
-            else
-            {
-                SSHWrite($"gphoto2 --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
-            }
-            
-            
+                        
 
-        }
-       public void SSHStart()
-        {
-            try
-            {
-                sshCLI = new SshClient("10.10.10.10", "ryanm", "Ryan1@3");
-
-                sshCLI.Connect();
-
-
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show("Unexpected error occurred: " + ex.Message);
-                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
-            }
-        }
-
-        public string SSHWrite(string _cmd)
-        {
-            try
-            {
-                sshStream.WriteLine(_cmd);
-                string output = sshStream.Read();
-                Thread.Sleep(100);
-                Console.WriteLine(output);
-                return output;
-
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show("Unexpected error occurred: " + ex.Message);
-                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
-                return "failed";
-            }
-        }
-        public void SSHEnd()
-        {
-            try
-            {
-                sshStream.Dispose();
-                sshCLI.Disconnect();
-                sshCLI.Dispose();
-
-
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show("Unexpected error occurred: " + ex.Message);
-                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
-            }
         }
 
         }

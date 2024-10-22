@@ -1,4 +1,6 @@
-﻿using ABB.Robotics.Controllers;
+﻿#define useSSH
+//#devin useWSL
+using ABB.Robotics.Controllers;
 using ABB.Robotics.Controllers.Discovery;
 using ABB.Robotics.Controllers.RapidDomain;
 using System;
@@ -28,7 +30,14 @@ namespace Photogrametry
         
 
         public Form1 fr;
-        public gphoto_CTRL gphoto;
+
+#if useWSL
+        public gphoto_WSL gphoto;
+#elif useSSH
+        public gphoto_SSH gphoto;
+#endif
+        
+            
         public decimal waittime = 100;
         string s;
         public string IP;

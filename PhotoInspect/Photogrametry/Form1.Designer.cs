@@ -42,7 +42,6 @@
             this.lbl_Interval = new System.Windows.Forms.Label();
             this.Interval = new System.Windows.Forms.NumericUpDown();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.chk_UseWSL = new System.Windows.Forms.CheckBox();
             this.lbl_WSLStatus = new System.Windows.Forms.Label();
             this.SubRunning = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -71,6 +70,8 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cameraHardwareIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.ssh_IpAddress = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Frames)).BeginInit();
@@ -248,7 +249,8 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.chk_UseWSL);
+            this.groupBox2.Controls.Add(this.ssh_IpAddress);
+            this.groupBox2.Controls.Add(this.textBox1);
             this.groupBox2.Controls.Add(this.lbl_WSLStatus);
             this.groupBox2.Controls.Add(this.SubRunning);
             this.groupBox2.Controls.Add(this.label3);
@@ -263,17 +265,7 @@
             this.groupBox2.TabIndex = 42;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Linux Sub System Controls";
-            // 
-            // chk_UseWSL
-            // 
-            this.chk_UseWSL.AutoSize = true;
-            this.chk_UseWSL.Location = new System.Drawing.Point(11, 177);
-            this.chk_UseWSL.Name = "chk_UseWSL";
-            this.chk_UseWSL.Size = new System.Drawing.Size(93, 20);
-            this.chk_UseWSL.TabIndex = 49;
-            this.chk_UseWSL.Text = "Use WSL?";
-            this.chk_UseWSL.UseVisualStyleBackColor = true;
-            this.chk_UseWSL.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
             // 
             // lbl_WSLStatus
             // 
@@ -317,7 +309,7 @@
             // 
             // btn_WSLStart
             // 
-            this.btn_WSLStart.Location = new System.Drawing.Point(8, 81);
+            this.btn_WSLStart.Location = new System.Drawing.Point(7, 143);
             this.btn_WSLStart.Margin = new System.Windows.Forms.Padding(4);
             this.btn_WSLStart.Name = "btn_WSLStart";
             this.btn_WSLStart.Size = new System.Drawing.Size(168, 30);
@@ -328,7 +320,7 @@
             // 
             // btn_WSLStop
             // 
-            this.btn_WSLStop.Location = new System.Drawing.Point(8, 118);
+            this.btn_WSLStop.Location = new System.Drawing.Point(7, 180);
             this.btn_WSLStop.Margin = new System.Windows.Forms.Padding(4);
             this.btn_WSLStop.Name = "btn_WSLStop";
             this.btn_WSLStop.Size = new System.Drawing.Size(168, 28);
@@ -536,6 +528,22 @@
             this.cameraHardwareIDToolStripMenuItem.Text = "Camera Hardware ID";
             this.cameraHardwareIDToolStripMenuItem.Click += new System.EventHandler(this.cameraHardwareIDToolStripMenuItem_Click);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(7, 115);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(168, 22);
+            this.textBox1.TabIndex = 49;
+            // 
+            // ssh_IpAddress
+            // 
+            this.ssh_IpAddress.AutoSize = true;
+            this.ssh_IpAddress.Location = new System.Drawing.Point(8, 93);
+            this.ssh_IpAddress.Name = "ssh_IpAddress";
+            this.ssh_IpAddress.Size = new System.Drawing.Size(110, 16);
+            this.ssh_IpAddress.TabIndex = 50;
+            this.ssh_IpAddress.Text = "SSH Controller IP";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -607,7 +615,8 @@
         private System.Windows.Forms.Button btn_StartRAP;
         private System.Windows.Forms.Button btn_RapContinue;
         public System.Windows.Forms.CheckBox DeleteFilesOnExit;
-        public System.Windows.Forms.CheckBox chk_UseWSL;
+        public System.Windows.Forms.Label ssh_IpAddress;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 
