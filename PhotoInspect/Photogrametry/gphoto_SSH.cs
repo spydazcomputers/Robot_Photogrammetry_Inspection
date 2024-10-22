@@ -86,7 +86,11 @@ namespace Photogrametry
             {
                 string Camera_Response;
                 Camera_Response = SSHWrite($"gphoto2 --num-files -f={fr.CameraFolder.Text}");
-                Match match = Regex.Match(Camera_Response, @"\d+$");
+                int index = Camera_Response.IndexOf($"Number of files in folder ");
+                string subresponse = Camera_Response.Substring(index);
+                int index2 = subresponse.IndexOf("\r");
+                subresponse = subresponse.Substring(0, index2);
+                Match match = Regex.Match(subresponse, @"\d+$");
                 if (match.Success)
                 {
                     return int.Parse(match.Value);
@@ -118,9 +122,10 @@ namespace Photogrametry
                 await WaitSeconds(fr.i_Interval);
             }
             SSHWrite("exit");
+            Thread.Sleep(100);
             //Download the Files to the RPI
             SSHWrite($"gphoto2 --force-overwrite --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
-
+            Thread.Sleep(5000);
             //Add SFTP code here to download the files to the local computer and delete from PI
 
         }
@@ -136,7 +141,6 @@ namespace Photogrametry
                 sshCLI.Connect();
                 //Start the CLI Stream
                 sshStream = sshCLI.CreateShellStream("input", 0, 0, 0, 0, 1000000);
-
                 if (sshStream.CanWrite) 
                     { 
                     fr.SubRunning.BackColor = System.Drawing.Color.Green;
@@ -155,9 +159,44 @@ namespace Photogrametry
         {
             try
             {
-                sshStream.WriteLine(_cmd);
-                string output = sshStream.ReadLine();
-                Console.WriteLine(output);
+                string EndOfCommandResponse = "EndOfOutput";
+                string output = null;
+                int index = -1;
+                output = sshStream.Read();
+                sshStream.Flush();
+                //Don't add EndOfOutput to Async Commands
+                if (_cmd != "gphoto2 --shell" && _cmd != "trigger-capture" && _cmd != "exit")
+                {
+                    sshStream.WriteLine(_cmd + $"; echo {EndOfCommandResponse}\n");
+                }
+                else
+                {
+                    sshStream.WriteLine(_cmd);
+                }
+                output = null;
+                Thread.Sleep(100);
+                while (index < 0)
+                {
+                    string output2 = sshStream.Read();
+                    if (_cmd != "gphoto2 --shell" && _cmd != "trigger-capture" && _cmd != "exit")
+                    {
+                        index = output2.IndexOf($"\nEndOfOutput\r");
+                        if (output2 != "")
+                        {
+                            Console.WriteLine(output2);
+                            output += output2;
+                        }
+                        Thread.Sleep(100);
+
+                    }
+                    else
+                    {
+                        Thread.Sleep(500);
+                        Console.WriteLine(output2);
+                        break;
+                    }
+                }
+                
                 return output;
 
             }
