@@ -18,10 +18,13 @@ namespace Photogrametry
     {
         public Form1 fr;
         public RapidFunctions Rap;
+        public bool subRunning;
+        
         private Process WSLproc;
         private bool WSLRunning=false;
         private SshClient sshCLI;
         private ShellStream sshStream;
+
         public gphoto_SSH(Form1 _form1)
         {
             this.fr = _form1;
@@ -34,13 +37,20 @@ namespace Photogrametry
             try
             {
 
-                    SSHStart();
-                    
-                 // Create a new folder in the Home Directory for this session and go there for capturing
+                SSHStart();
+                //Check if we succeeded in starting the SSHShell
+                if (subRunning)
+                {
+                    // Create a new folder in the Home Directory for this session and go there for capturing
                     SSHWrite("cd ~/camera");
                     string now = DateTime.Now.ToString("dd_MM_yy_HH_mm");
                     SSHWrite($"mkdir photos_{now}");
                     SSHWrite($"cd photos_{now}");
+                }
+                else 
+                {
+                    //Add Start Failed Handler here
+                }
             }
             catch(System.Exception ex) 
             {
@@ -96,16 +106,20 @@ namespace Photogrametry
             int startfiles;
             //Find out how many photos are on the camera (Used to download at the end)
             startfiles = GetCameraCount();
-            
+            SSHWrite($"gphoto2 --shell");
+            Thread.Sleep(1000);
             for (int i = 0; i < fr.i_Frames; i++)
             {
+
+                
                 //Capture the photos (Trigger capture is the fastest and we don't need other options)
-                SSHWrite($"gphoto2 --trigger-capture");
+                SSHWrite($"trigger-capture");
                 //Wait the defined interval
                 await WaitSeconds(fr.i_Interval);
             }
+            SSHWrite("exit");
             //Download the Files to the RPI
-            SSHWrite($"gphoto2 --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
+            SSHWrite($"gphoto2 --force-overwrite --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
 
             //Add SFTP code here to download the files to the local computer and delete from PI
 
@@ -122,6 +136,13 @@ namespace Photogrametry
                 sshCLI.Connect();
                 //Start the CLI Stream
                 sshStream = sshCLI.CreateShellStream("input", 0, 0, 0, 0, 1000000);
+
+                if (sshStream.CanWrite) 
+                    { 
+                    fr.SubRunning.BackColor = System.Drawing.Color.Green;
+                    fr.SubRunning.Text = "Running";
+                    subRunning = true;
+                    }    
             }
             catch (System.Exception ex)
             {
@@ -135,8 +156,7 @@ namespace Photogrametry
             try
             {
                 sshStream.WriteLine(_cmd);
-                string output = sshStream.Read();
-                Thread.Sleep(100);
+                string output = sshStream.ReadLine();
                 Console.WriteLine(output);
                 return output;
 
@@ -156,6 +176,11 @@ namespace Photogrametry
                 sshCLI.Disconnect();
                 sshCLI.Dispose();
 
+                    fr.SubRunning.BackColor = System.Drawing.Color.Red;
+                    fr.SubRunning.Text = "Stopped";
+                    subRunning = false;
+
+                
 
             }
             catch (System.Exception ex)

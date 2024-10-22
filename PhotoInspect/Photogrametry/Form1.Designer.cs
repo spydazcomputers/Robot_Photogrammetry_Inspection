@@ -42,6 +42,8 @@
             this.lbl_Interval = new System.Windows.Forms.Label();
             this.Interval = new System.Windows.Forms.NumericUpDown();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.lbl_ssh_IpAddress = new System.Windows.Forms.Label();
+            this.ssh_IpAddress = new System.Windows.Forms.TextBox();
             this.lbl_WSLStatus = new System.Windows.Forms.Label();
             this.SubRunning = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -70,8 +72,6 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cameraHardwareIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.ssh_IpAddress = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Frames)).BeginInit();
@@ -249,8 +249,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.lbl_ssh_IpAddress);
             this.groupBox2.Controls.Add(this.ssh_IpAddress);
-            this.groupBox2.Controls.Add(this.textBox1);
             this.groupBox2.Controls.Add(this.lbl_WSLStatus);
             this.groupBox2.Controls.Add(this.SubRunning);
             this.groupBox2.Controls.Add(this.label3);
@@ -266,6 +266,23 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Linux Sub System Controls";
             this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
+            // 
+            // lbl_ssh_IpAddress
+            // 
+            this.lbl_ssh_IpAddress.AutoSize = true;
+            this.lbl_ssh_IpAddress.Location = new System.Drawing.Point(8, 93);
+            this.lbl_ssh_IpAddress.Name = "lbl_ssh_IpAddress";
+            this.lbl_ssh_IpAddress.Size = new System.Drawing.Size(110, 16);
+            this.lbl_ssh_IpAddress.TabIndex = 50;
+            this.lbl_ssh_IpAddress.Text = "SSH Controller IP";
+            // 
+            // ssh_IpAddress
+            // 
+            this.ssh_IpAddress.Location = new System.Drawing.Point(7, 115);
+            this.ssh_IpAddress.Name = "ssh_IpAddress";
+            this.ssh_IpAddress.Size = new System.Drawing.Size(168, 22);
+            this.ssh_IpAddress.TabIndex = 49;
+            this.ssh_IpAddress.Text = "10.10.10.10";
             // 
             // lbl_WSLStatus
             // 
@@ -528,22 +545,6 @@
             this.cameraHardwareIDToolStripMenuItem.Text = "Camera Hardware ID";
             this.cameraHardwareIDToolStripMenuItem.Click += new System.EventHandler(this.cameraHardwareIDToolStripMenuItem_Click);
             // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(7, 115);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(168, 22);
-            this.textBox1.TabIndex = 49;
-            // 
-            // ssh_IpAddress
-            // 
-            this.ssh_IpAddress.AutoSize = true;
-            this.ssh_IpAddress.Location = new System.Drawing.Point(8, 93);
-            this.ssh_IpAddress.Name = "ssh_IpAddress";
-            this.ssh_IpAddress.Size = new System.Drawing.Size(110, 16);
-            this.ssh_IpAddress.TabIndex = 50;
-            this.ssh_IpAddress.Text = "SSH Controller IP";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -615,8 +616,8 @@
         private System.Windows.Forms.Button btn_StartRAP;
         private System.Windows.Forms.Button btn_RapContinue;
         public System.Windows.Forms.CheckBox DeleteFilesOnExit;
-        public System.Windows.Forms.Label ssh_IpAddress;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label lbl_ssh_IpAddress;
+        public System.Windows.Forms.TextBox ssh_IpAddress;
     }
 }
 

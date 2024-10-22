@@ -237,7 +237,7 @@ namespace Photogrametry
                                        
         }
 
-        private void button5_Click_1(object sender, EventArgs e)
+        private void btn_SubSystemStart(object sender, EventArgs e)
         {
             gphoto.SubSystemStart();
         }
