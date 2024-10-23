@@ -29,11 +29,8 @@ namespace Photogrametry
             Rap = new RapidFunctions(this);
 
 // Load the Correct Photo Library
-#if useWSL
-            gphoto = new gphoto_WSL(this);
-#elif useSSH
             gphoto = new gphoto_SSH(this);
-#endif
+
 
             // Pass RapidFunctions and gPhoto to each other
             Rap.gphoto = gphoto;
