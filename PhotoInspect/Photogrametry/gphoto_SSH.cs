@@ -109,7 +109,7 @@ namespace Photogrametry
             for (int i = 0; i < fr.i_Frames; i++)
             {
                 SSHWrite($"gphoto2 --trigger-capture");
-
+                await WaitSeconds(fr.i_Interval);
             }
 
 
