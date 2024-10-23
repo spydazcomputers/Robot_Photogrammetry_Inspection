@@ -71,7 +71,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="gphoto_SSH.cs" />
-    <Compile Include="gphoto_WSL.cs" />
     <Compile Include="Rapid.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

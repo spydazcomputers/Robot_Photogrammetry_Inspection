@@ -106,12 +106,18 @@ namespace Photogrametry
             int startfiles;
             //Find out how many photos are on the camera (Used to download at the end)
             startfiles = GetCameraCount();
-            SSHWrite($"gphoto2 --trigger-capture");
-            
-            Thread.Sleep(100);
+            for (int i = 0; i < fr.i_Frames; i++)
+            {
+                SSHWrite($"gphoto2 --trigger-capture");
+
+            }
+
+
+
+            //Thread.Sleep(100);
             //Download the Files to the RPI
             SSHWrite($"gphoto2 --force-overwrite --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             //Add SFTP code here to download the files to the local computer and delete from PI
 
         }
