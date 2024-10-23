@@ -24,7 +24,7 @@ namespace Photogrametry
         private bool WSLRunning=false;
         private SshClient sshCLI;
         private ShellStream sshStream;
-
+        private string folder;
         public gphoto_SSH(Form1 _form1)
         {
             this.fr = _form1;
@@ -42,10 +42,10 @@ namespace Photogrametry
                 if (subRunning)
                 {
                     // Create a new folder in the Home Directory for this session and go there for capturing
-                    SSHWrite("cd ~/camera");
                     string now = DateTime.Now.ToString("dd_MM_yy_HH_mm");
-                    SSHWrite($"mkdir photos_{now}");
-                    SSHWrite($"cd photos_{now}");
+                    folder = $"~/camera/photos_{now}";
+                    SSHWrite($"mkdir {folder}");
+                    
                 }
                 else 
                 {
@@ -86,11 +86,7 @@ namespace Photogrametry
             {
                 string Camera_Response;
                 Camera_Response = SSHWrite($"gphoto2 --num-files -f={fr.CameraFolder.Text}");
-                int index = Camera_Response.IndexOf($"Number of files in folder ");
-                string subresponse = Camera_Response.Substring(index);
-                int index2 = subresponse.IndexOf("\r");
-                subresponse = subresponse.Substring(0, index2);
-                Match match = Regex.Match(subresponse, @"\d+$");
+                Match match = Regex.Match(Camera_Response, @"\d+$");
                 if (match.Success)
                 {
                     return int.Parse(match.Value);
@@ -110,22 +106,18 @@ namespace Photogrametry
             int startfiles;
             //Find out how many photos are on the camera (Used to download at the end)
             startfiles = GetCameraCount();
-            SSHWrite($"gphoto2 --shell");
-            Thread.Sleep(1000);
             for (int i = 0; i < fr.i_Frames; i++)
             {
+                SSHWrite($"gphoto2 --trigger-capture");
 
-                
-                //Capture the photos (Trigger capture is the fastest and we don't need other options)
-                SSHWrite($"trigger-capture");
-                //Wait the defined interval
-                await WaitSeconds(fr.i_Interval);
             }
-            SSHWrite("exit");
-            Thread.Sleep(100);
+
+
+
+            //Thread.Sleep(100);
             //Download the Files to the RPI
             SSHWrite($"gphoto2 --force-overwrite --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             //Add SFTP code here to download the files to the local computer and delete from PI
 
         }
@@ -159,44 +151,12 @@ namespace Photogrametry
         {
             try
             {
-                string EndOfCommandResponse = "EndOfOutput";
                 string output = null;
-                int index = -1;
-                output = sshStream.Read();
-                sshStream.Flush();
-                //Don't add EndOfOutput to Async Commands
-                if (_cmd != "gphoto2 --shell" && _cmd != "trigger-capture" && _cmd != "exit")
-                {
-                    sshStream.WriteLine(_cmd + $"; echo {EndOfCommandResponse}\n");
-                }
-                else
-                {
-                    sshStream.WriteLine(_cmd);
-                }
-                output = null;
-                Thread.Sleep(100);
-                while (index < 0)
-                {
-                    string output2 = sshStream.Read();
-                    if (_cmd != "gphoto2 --shell" && _cmd != "trigger-capture" && _cmd != "exit")
-                    {
-                        index = output2.IndexOf($"\nEndOfOutput\r");
-                        if (output2 != "")
-                        {
-                            Console.WriteLine(output2);
-                            output += output2;
-                        }
-                        Thread.Sleep(100);
-
-                    }
-                    else
-                    {
-                        Thread.Sleep(500);
-                        Console.WriteLine(output2);
-                        break;
-                    }
-                }
-                
+                string command = $"cd {folder}; {_cmd}";
+                SshCommand sc = sshCLI.CreateCommand(command);
+                sc.Execute();
+                output = sc.Result;
+                Console.WriteLine(output);
                 return output;
 
             }

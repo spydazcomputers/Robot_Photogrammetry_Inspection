@@ -1,6 +1,4 @@
-﻿#define useSSH
-//#defin useWSL
-using ABB.Robotics.Controllers;
+﻿using ABB.Robotics.Controllers;
 using System;
 using System.Windows.Forms;
 
@@ -19,11 +17,7 @@ namespace Photogrametry
         RapidFunctions Rap;
 
         // Create the correct version of gphoto library connection
-#if useWSL
-       gphoto_WSL gphoto;
-#elif useSSH
-        gphoto_SSH gphoto;
-#endif
+       gphoto_SSH gphoto;
 
         public string s_hardwareID;
         public int i_Frames, i_Interval;
