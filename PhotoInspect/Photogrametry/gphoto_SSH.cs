@@ -1,8 +1,10 @@
 ﻿using Renci.SshNet;
 using Renci.SshNet.Common;
+using Renci.SshNet.Sftp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -19,12 +21,17 @@ namespace Photogrametry
         public Form1 fr;
         public RapidFunctions Rap;
         public bool subRunning;
+        public string LocalFolder = null;
         
         private Process WSLproc;
         private bool WSLRunning=false;
         private SshClient sshCLI;
         private ShellStream sshStream;
         private string folder;
+        private string host;
+        private string username;
+        private string password;
+
         public gphoto_SSH(Form1 _form1)
         {
             this.fr = _form1;
@@ -45,7 +52,8 @@ namespace Photogrametry
                     string now = DateTime.Now.ToString("dd_MM_yy_HH_mm");
                     folder = $"~/camera/photos_{now}";
                     SSHWrite($"mkdir {folder}");
-                    
+
+
                 }
                 else 
                 {
@@ -119,7 +127,7 @@ namespace Photogrametry
             SSHWrite($"gphoto2 --force-overwrite --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
             //Thread.Sleep(5000);
             //Add SFTP code here to download the files to the local computer and delete from PI
-
+            SFTP_Retrieve();
         }
 
         // This Function connects to the Pi
@@ -128,7 +136,10 @@ namespace Photogrametry
             try
             {
                 //Connect to the pi as gphoto user
-                sshCLI = new SshClient(fr.ssh_IpAddress.Text, "gphoto", "gphoto");
+                host = fr.ssh_IpAddress.Text.ToString();
+                username = "gphoto";
+                password = "gphoto";
+                sshCLI = new SshClient(host, username, password);
                 //Connect To SSH
                 sshCLI.Connect();
                 //Start the CLI Stream
@@ -138,7 +149,8 @@ namespace Photogrametry
                     fr.SubRunning.BackColor = System.Drawing.Color.Green;
                     fr.SubRunning.Text = "Running";
                     subRunning = true;
-                    }    
+                    
+                }    
             }
             catch (System.Exception ex)
             {
@@ -189,5 +201,104 @@ namespace Photogrametry
             }
         }
 
+        /// <summary>
+        /// Downloads a remote directory into a local directory
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        private void DownloadDirectory(SftpClient client, string source, string destination, bool recursive = false)
+        {
+            // List the files and folders of the directory
+            var files = client.ListDirectory(source);
+
+            // Iterate over them
+            foreach (SftpFile file in files)
+            {
+                // If is a file, download it
+                if (!file.IsDirectory && !file.IsSymbolicLink)
+                {
+                    DownloadFile(client, file, destination);
+                }
+                // If it's a symbolic link, ignore it
+                else if (file.IsSymbolicLink)
+                {
+                    Console.WriteLine("Symbolic link ignored: {0}", file.FullName);
+                }
+                // If its a directory, create it locally (and ignore the .. and .=) 
+                //. is the current folder
+                //.. is the folder above the current folder -the folder that contains the current folder.
+                else if (file.Name != "." && file.Name != "..")
+                {
+                    var dir = Directory.CreateDirectory(Path.Combine(destination, file.Name));
+                    // and start downloading it's content recursively :) in case it's required
+                    if (recursive)
+                    {
+                        DownloadDirectory(client, file.FullName, dir.FullName);
+                    }
+                }
+            }
         }
+
+        /// <summary>
+        /// Downloads a remote file through the client into a local directory
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="file"></param>
+        /// <param name="directory"></param>
+        private void DownloadFile(SftpClient client, SftpFile file, string directory)
+        {
+            Console.WriteLine("Downloading {0}", file.FullName);
+
+            using (Stream fileStream = File.OpenWrite(Path.Combine(directory, file.Name)))
+            {
+                client.DownloadFile(file.FullName, fileStream);
+            }
+        }   
+
+
+        private void SFTP_Retrieve()
+        {
+            Thread myThread = new System.Threading.Thread(delegate () {
+                
+
+                // Path to folder on SFTP server
+                string pathRemoteDirectory = $"/home/{username}{folder.Substring(1)}";
+                // Path where the file should be saved once downloaded (locally)
+                if(LocalFolder ==  null)
+                {
+                    LocalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                }
+                string pathLocalDirectory = $"{LocalFolder}\\{folder.Substring(9)}";
+                Directory.CreateDirectory(pathLocalDirectory);
+                using (SftpClient sftp = new SftpClient(host, username, password))
+                {
+                    try
+                    {
+                        sftp.Connect();
+
+                        // By default, the method doesn't download subdirectories
+                        // therefore you need to indicate that you want their content too
+                        bool recursiveDownload = true;
+
+                        // Start download of the directory
+                        DownloadDirectory(
+                            sftp,
+                            pathRemoteDirectory,
+                            pathLocalDirectory,
+                            recursiveDownload
+                        );
+
+                        sftp.Disconnect();
+                    }
+                    catch (Exception er)
+                    {
+                        Console.WriteLine("An exception has been caught " + er.ToString());
+                    }
+                }
+            });
+
+            myThread.Start();
+        }
+    }
     }

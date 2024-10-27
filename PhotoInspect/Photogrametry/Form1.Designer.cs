@@ -33,7 +33,8 @@
             this.btn_StopRap = new System.Windows.Forms.Button();
             this.btn_StartRAP = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.DeleteFilesOnExit = new System.Windows.Forms.CheckBox();
+            this.lbl_SelectFolder = new System.Windows.Forms.Label();
+            this.btn_SelectFolder = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.CameraFolder = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -102,7 +103,6 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "f";
-            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // btn_RapContinue
             // 
@@ -136,7 +136,8 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.DeleteFilesOnExit);
+            this.groupBox3.Controls.Add(this.lbl_SelectFolder);
+            this.groupBox3.Controls.Add(this.btn_SelectFolder);
             this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Controls.Add(this.CameraFolder);
             this.groupBox3.Controls.Add(this.label2);
@@ -144,30 +145,40 @@
             this.groupBox3.Controls.Add(this.btn_Capture);
             this.groupBox3.Controls.Add(this.lbl_Interval);
             this.groupBox3.Controls.Add(this.Interval);
-            this.groupBox3.Location = new System.Drawing.Point(1079, 344);
+            this.groupBox3.Enabled = false;
+            this.groupBox3.Location = new System.Drawing.Point(1079, 338);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Size = new System.Drawing.Size(267, 302);
+            this.groupBox3.Size = new System.Drawing.Size(267, 252);
             this.groupBox3.TabIndex = 43;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "GPhoto Controls";
             this.groupBox3.Enter += new System.EventHandler(this.groupBox3_Enter);
             // 
-            // DeleteFilesOnExit
+            // lbl_SelectFolder
             // 
-            this.DeleteFilesOnExit.AutoSize = true;
-            this.DeleteFilesOnExit.Location = new System.Drawing.Point(11, 203);
-            this.DeleteFilesOnExit.Name = "DeleteFilesOnExit";
-            this.DeleteFilesOnExit.Size = new System.Drawing.Size(145, 20);
-            this.DeleteFilesOnExit.TabIndex = 48;
-            this.DeleteFilesOnExit.Text = "Delete Files On Exit";
-            this.DeleteFilesOnExit.UseVisualStyleBackColor = true;
+            this.lbl_SelectFolder.AutoSize = true;
+            this.lbl_SelectFolder.Location = new System.Drawing.Point(11, 141);
+            this.lbl_SelectFolder.Name = "lbl_SelectFolder";
+            this.lbl_SelectFolder.Size = new System.Drawing.Size(123, 16);
+            this.lbl_SelectFolder.TabIndex = 49;
+            this.lbl_SelectFolder.Text = "Select Local Folder";
+            // 
+            // btn_SelectFolder
+            // 
+            this.btn_SelectFolder.Location = new System.Drawing.Point(8, 160);
+            this.btn_SelectFolder.Name = "btn_SelectFolder";
+            this.btn_SelectFolder.Size = new System.Drawing.Size(158, 23);
+            this.btn_SelectFolder.TabIndex = 46;
+            this.btn_SelectFolder.Text = "Browse";
+            this.btn_SelectFolder.UseVisualStyleBackColor = true;
+            this.btn_SelectFolder.Click += new System.EventHandler(this.btn_SelectFolder_Click);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(8, 239);
+            this.label4.Location = new System.Drawing.Point(11, 190);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(138, 16);
@@ -176,7 +187,7 @@
             // 
             // CameraFolder
             // 
-            this.CameraFolder.Location = new System.Drawing.Point(11, 259);
+            this.CameraFolder.Location = new System.Drawing.Point(11, 210);
             this.CameraFolder.Margin = new System.Windows.Forms.Padding(4);
             this.CameraFolder.Name = "CameraFolder";
             this.CameraFolder.Size = new System.Drawing.Size(167, 22);
@@ -209,10 +220,10 @@
             // 
             // btn_Capture
             // 
-            this.btn_Capture.Location = new System.Drawing.Point(8, 158);
+            this.btn_Capture.Location = new System.Drawing.Point(171, 90);
             this.btn_Capture.Margin = new System.Windows.Forms.Padding(4);
             this.btn_Capture.Name = "btn_Capture";
-            this.btn_Capture.Size = new System.Drawing.Size(149, 28);
+            this.btn_Capture.Size = new System.Drawing.Size(96, 44);
             this.btn_Capture.TabIndex = 40;
             this.btn_Capture.Text = "Capture Photos";
             this.btn_Capture.UseVisualStyleBackColor = true;
@@ -525,7 +536,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(5, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1363, 30);
+            this.menuStrip1.Size = new System.Drawing.Size(1363, 28);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
@@ -615,9 +626,10 @@
         private System.Windows.Forms.Button btn_StopRap;
         private System.Windows.Forms.Button btn_StartRAP;
         private System.Windows.Forms.Button btn_RapContinue;
-        public System.Windows.Forms.CheckBox DeleteFilesOnExit;
         private System.Windows.Forms.Label lbl_ssh_IpAddress;
         public System.Windows.Forms.TextBox ssh_IpAddress;
+        private System.Windows.Forms.Label lbl_SelectFolder;
+        private System.Windows.Forms.Button btn_SelectFolder;
     }
 }
 

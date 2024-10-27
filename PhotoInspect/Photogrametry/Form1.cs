@@ -27,8 +27,6 @@ namespace Photogrametry
             InitializeComponent();
             Listmethod();
             Rap = new RapidFunctions(this);
-
-// Load the Correct Photo Library
             gphoto = new gphoto_SSH(this);
 
 
@@ -70,16 +68,7 @@ namespace Photogrametry
             
         }
 
-        void OnRowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-           
-
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            
-        }
+     
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -96,12 +85,6 @@ namespace Photogrametry
         }
 
         
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-        
-        }
-
         
         private void SetText(string text)
         {
@@ -120,32 +103,7 @@ namespace Photogrametry
         }
         delegate void SetTextCallback(string text);
 
-        public void ThreadProcSafe(string MSG)
-        {
-            this.SetText(MSG);
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btn_SaveLog_Click(object sender, EventArgs e)
+         private void btn_SaveLog_Click(object sender, EventArgs e)
         {
             SaveFileDialog file = new SaveFileDialog();
             file.Filter = "log files (*.log)|*.txt|All files (*.*)|*.*";
@@ -274,11 +232,16 @@ namespace Photogrametry
         private void btn_WSLStart_Click(object sender, EventArgs e)
         {
             gphoto.SubSystemStart();
+            if (this.SubRunning.Text == "Running")
+            {
+                groupBox3.Enabled = true;
+            }
         }
 
         private void btn_WSLStop_Click(object sender, EventArgs e)
         {
             gphoto.SubSystemStop();
+            groupBox3.Enabled = false;
         }
 
         private void CameraFolder_TextChanged(object sender, EventArgs e)
@@ -344,6 +307,22 @@ namespace Photogrametry
         private void groupBox2_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void btn_SelectFolder_Click(object sender, EventArgs e)
+        {
+            var folderDialog = new FolderBrowserDialog();
+            DialogResult result = folderDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                gphoto.LocalFolder = folderDialog.SelectedPath;
+                //Use folder path
+            }
+            else
+            {
+                //Operation aborted by the user
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
