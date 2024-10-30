@@ -1,0 +1,58 @@
+#
+# Generated backup file, do not edit.
+#
+# Originally at: C:\Users\am0442\OneDrive - CCSU\Documents\RobotStudio\Virtual Controllers\TEMP\e3edfde0-cd23-4818-a694-f3bc6ef2da5a\backup.867842
+# 2023-03-28  10:34:25
+#
+>>SYSTEM_ID:
+1200-800743
+
+>>PRODUCTS_ID:
+RobotWare Version: 6.13.01.00
+
+  RobotWare Base
+  709-1 DeviceNet Master/Slave
+  841-1 EtherNet/IP Scanner/Adapter
+  687-1 Advanced Robot Motion
+  608-1 World Zones
+  610-1 Independent Axis
+  611-1 Path Recovery
+  612-1 Path Offset
+  885-1 SoftMove
+  613-1 Collision Detection
+  614-1 FTP SFTP and NFS client
+  616-1 PC Interface
+  617-1 FlexPendant Interface
+  623-1 Multitasking
+  628-1 Sensor Interface
+  689-1 Externally Guided Motion (EGM)
+  UDPUC Driver
+  1341-1/1520-1 Integrated Vision Interface
+  661-2 Force Control Base
+  Motor Commutation
+  Service Info System
+  Pendelum Calibration
+  Drive System IRB 120/140/260/360/910SC/1200/1400/1520/1600/1660ID IRC5 Compact
+  IRB 1200-5/0.9 Type B
+  Axis Calibration
+
+>>HOME:
+All public files and directories
+
+>>SYSPAR:
+SYS.cfg
+PROC.cfg
+MMC.cfg
+EIO.cfg
+SIO.cfg
+MOC.cfg
+
+
+>>TASK1: (T_ROB1,,)
+PROGMOD\Tooling.mod @ 
+SYSMOD\user.sys @ 
+PROGMOD\CCSUMain.mod @ 
+PROGMOD\TRob1Main.mod @ 
+
+
+>>EOF:

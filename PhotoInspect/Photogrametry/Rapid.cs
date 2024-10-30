@@ -1,4 +1,4 @@
-﻿
+﻿ 
 using ABB.Robotics.Controllers;
 using ABB.Robotics.Controllers.Discovery;
 using ABB.Robotics.Controllers.RapidDomain;
@@ -211,11 +211,14 @@ namespace Photogrametry
             Bool _waiting = (Bool)controllerWaiting.Value;
             if (_waiting == true)
             {
+
                 //Things to do when robot is waiting 
                 //gphoto.CaptureAndDownload();
                                                                              
             }
+        
         }
+
         //End Event Handlers
 
 

@@ -325,6 +325,11 @@ namespace Photogrametry
             }
         }
 
+        private void CameraFolder_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             gphoto.SubSystemStop();

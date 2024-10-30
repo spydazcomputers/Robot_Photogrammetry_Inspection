@@ -1,0 +1,32 @@
+
+MODULE user(SYSMODULE)
+
+    ! Predefined user data
+    !*********************
+
+    ! Declaration of numeric registers reg1...reg5
+    VAR num reg1:=0;
+    VAR num reg2:=0;
+    VAR num reg3:=0;
+    VAR num reg4:=0;
+    VAR num reg5:=0;
+
+    ! Declaration of stopwatch clock1
+    VAR clock clock1;
+
+    ! Tool Data
+    TASK PERS tooldata Gripper:=[TRUE,[[0,0,170],[1,0,0,0]],[1,[0,0,1],[1,0,0,0],0,0,0]];
+    !Gripper with force senscor 
+    TASK PERS tooldata Gripper_FS:=[TRUE,[[0,0,225],[1,0,0,0]],[4,[-2.2,4.3,81.2],[1,0,0,0],0,0,0.006]];
+    !gripper with teaching tool & FS
+    TASK PERS tooldata Gripper_Teach_FS:=[TRUE,[[0.248527,2.29601,199.301],[1,-0.000197831,7.9931E-05,2.11299E-08]],[1,[0,0,0],[1,0,0,0],0,0,0]];
+
+    ! Template for declaration of workobject wobj1
+    !TASK PERS wobjdata wobj1 := [FALSE, TRUE, "", [[0, 0, 0],[1, 0, 0, 0]],[[0, 0, 0],[1, 0, 0, 0]]];
+
+
+    !Speeds 
+
+    CONST speeddata vGR1_5:=[3,500,5000,1000];
+
+ENDMODULE

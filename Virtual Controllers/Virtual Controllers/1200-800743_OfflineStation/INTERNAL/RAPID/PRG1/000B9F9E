@@ -1,0 +1,65 @@
+MODULE CCSU_FUNCTIONS
+    
+    
+    !CHANGES INPUT VALUE AND RANGE TO A NEW RANGE WITHOUT LOSING RATIO
+    !EXAMPLE: [0 - 100] WITH INPUT (50) WITH NEW RANGE [0 - 1] WILL RETURN (0.5)
+    FUNC num changeRangeMaintainRatio(num Value, num OldMin, num OldMax, num NewMin, num NewMax)
+        RETURN (((Value - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin;
+    ENDFUNC
+    
+    
+    
+    !MOVES UP X UNITS ABOVE RELATIVE TARGET
+    FUNC robtarget GetLocationXUnitsAbove(robtarget relativeVal, num units)
+        VAR robtarget setVal;
+        setVal := relativeVal;
+        setVal.trans.z := relativeVal.trans.z - units;
+        RETURN setVal;
+    ENDFUNC
+    
+    
+    
+    !RETURNS HEIGHT ROBOT SHOULD BE TO GRAB OBJECT
+    FUNC num getCalculatedHeight()
+        
+        IF (CameraPartViewS > 100 AND CameraPartViewS < 110) THEN !BETWEEN NO CHANGE AND 2x CHANGE?
+            RETURN changeRangeMaintainRatio(CameraPartViewS, 100, 110, 0, HeightCalibration); !OLD RANGE IS SCALE, NEW RANGE IS POSITION
+        ENDIF
+        
+        !IF THE IF STATEMENT ABOVE FAILS, RETURN TO DEFAULT HEIGHT
+        RETURN 0;
+        
+    ENDFUNC
+    
+    
+    
+    FUNC string ChoosePartToGrab(string xory,num partnumber)
+
+        !IF 0 IS THE PART NUMBER BEING PASSED IN DO DIFFERENT FORMATTING
+        IF (partnumber=0) THEN
+            IF (xory="X" OR xory="x") THEN
+                RETURN "Pattern_1.Fixture"+".X";
+            ELSEIF (xory="Y" OR xory="y") THEN
+                RETURN "Pattern_1.Fixture"+".Y";
+            ELSEIF (xory="R" OR xory="r") THEN
+                RETURN "Pattern_1.Fixture"+".Angle";
+            ELSEIF (xory="S" OR xory="s") THEN
+                RETURN "Pattern_1.Fixture"+".Scale";
+            ENDIF
+        ELSE
+            IF (xory="X" OR xory="x") THEN
+                RETURN "Pattern_1.Fixture"+NumToStr(partnumber,0)+".X";
+            ELSEIF (xory="Y" OR xory="y") THEN
+                RETURN "Pattern_1.Fixture"+NumToStr(partnumber,0)+".Y";
+            ELSEIF (xory="R" OR xory="r") THEN
+                RETURN "Pattern_1.Fixture"+NumToStr(partnumber,0)+".Angle";
+            ELSEIF (xory="S" OR xory="s") THEN
+                RETURN "Pattern_1.Fixture"+NumToStr(partnumber,0)+".Scale";
+            ENDIF
+        ENDIF
+
+    ENDFUNC
+    
+    
+    
+ENDMODULE
