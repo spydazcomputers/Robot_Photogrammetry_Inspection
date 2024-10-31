@@ -1,5 +1,0 @@
-<?xml version = "1.0" encoding="utf-8" ?>
-<option_registry xmlns="urn:abb-robotics-registry-option">
-<entry option="ROBOTS" path="$PRODUCTS/Robots_1.5.0"/>
-<entry option="gtpuSDK" path="$PRODUCTS/RobotControl_7.5.1/options/gtpusdk"/>
-</option_registry>
