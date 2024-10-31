@@ -1,8 +1,8 @@
 **Windows Form Application with**
 
-**WSL and ABB Robotics Integration**
+**GPhoto2 and  ABB Robotics Integration**
 
-This repository contains a Windows Form Application that leverages the Windows Subsystem for Linux (WSL) to run gphoto2 in combination with the ABB Robotics PC SDK to manipulate a robot. The application provides a user-friendly interface for controlling the robot and managing camera operations.
+This repository contains a Windows Form Application that leverages the SSH.net to communicate witha linux system running photo2 in combination with the ABB Robotics PC SDK to manipulate a robot. The application provides a user-friendly interface for controlling the robot and managing camera operations.
 
 **Features**
 
@@ -13,7 +13,7 @@ This repository contains a Windows Form Application that leverages the Windows S
 **Project Structure**
 
 - **Rapid.cs**: Contains commands and controls for interfacing with the robot.
-- **gphoto.cs**: Manages the gphoto2 and WSL interfaces.
+- **gphoto.cs**: Manages the gphoto2 and SSH.net interfaces.
 
 **Getting Started**
 
@@ -21,7 +21,7 @@ This repository contains a Windows Form Application that leverages the Windows S
 
 - Windows 10 or later with WSL installed.
 - ABB Robotics PC SDK.
-- gphoto2 installed on WSL.
+- gphoto2 installed on a linux pc (Raspberry PI) With SSH Enabled.
 
 **Installation**
 
@@ -42,5 +42,3 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 **License**
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-Feel free to customize this template to better fit your project's specifics. Let me know if you need any more details or adjustments
