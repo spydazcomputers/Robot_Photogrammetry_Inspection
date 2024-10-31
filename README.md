@@ -7,7 +7,7 @@ This repository contains a Windows Form Application that leverages the SSH.net t
 **Features**
 
 - **Robot Manipulation**: Utilize the ABB Robotics PC SDK to control and manipulate the robot.
-- **Camera Control**: Use gphoto2 through WSL to manage camera operations.
+- **Camera Control**: Use gphoto2 through an SSH connection to manage camera operations.
 - **User Interface**: A Windows Form Application that provides an intuitive interface for interacting with the robot and camera.
 
 **Project Structure**
