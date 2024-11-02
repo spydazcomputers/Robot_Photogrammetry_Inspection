@@ -26,6 +26,8 @@ namespace Photogrametry
         RapidData data7;
         RapidData data8;
         RapidData controllerWaiting;
+        RapidData funcCall;
+        RapidData axis6Allowed;
         
 
         public Form1 fr;
@@ -37,6 +39,9 @@ namespace Photogrametry
         string s;
         public string IP;
         public Controller controller = null;
+
+        public bool _waiting = true;
+        public bool PhotosComplete = false;
         public RapidFunctions(Form1 _form1)
         {
             this.fr = _form1;
@@ -97,17 +102,25 @@ namespace Photogrametry
             {
                 if (controller.OperatingMode == ControllerOperatingMode.Auto)
                 {
+                    controllerWaiting = controller.Rapid.GetRapidData("T_ROB1", "Photogrametry", "extern_wait");
+                    controllerWaiting.ValueChanged += new EventHandler<DataValueChangedEventArgs>(ControllerWaitCheck);
                     tasks = controller.Rapid.GetTasks();
                     tasks[0].ProgramPointerChanged += new EventHandler<ProgramPositionEventArgs>(ProgramPointer_Changed);
+
+                    axis6Allowed = controller.Rapid.GetRapidData("T_ROB1", "Photogrametry", "axis6Allowed");
+
                     using (m = Mastership.Request(controller.Rapid))
                     {
                         //Perform operation
                         tasks[0].ResetProgramPointer(); 
                         controller.Rapid.Start();
+                        funcCall = controller.Rapid.GetRapidData("T_ROB1", "Photogrametry", "funcCall");
+                        funcCall.StringValue = "\"\"";
                     }
-                    controllerWaiting = controller.Rapid.GetRapidData("T_ROB1", "Module1", "extern_wait");
-                    controllerWaiting.ValueChanged += new EventHandler<DataValueChangedEventArgs>(ControllerWaitCheck);
-                    }
+                    
+                    
+
+                }
                 else
                 {
                     MessageBox.Show(
@@ -193,13 +206,125 @@ namespace Photogrametry
                 }
             }
         }
-       
-// Event Handlers
-        private void ProgramPointer_Changed(object sender, ProgramPositionEventArgs e)
+//This is the primary photo sequence it will pick up a part, move to the first photo position, take the orbits,
+//Move to the next angle and retake the orbits and repeat until done.
+        public async void PhotoSequence()
+        {
+            int sequenceStep = 0;
+            int numOfPhotoSteps = 3;
+            string hmm = funcCall.StringValue;
+
+            try
+            {
+
+                
+                while (sequenceStep < numOfPhotoSteps)
+                {
+                    
+                    if (_waiting == true)
+                    {
+
+                        using (m = Mastership.Request(controller.Rapid))
+                        {
+                                switch (sequenceStep)
+                            {
+                                case 0:
+                                    funcCall.StringValue = "\"PickPart\"";
+                                    controllerWaiting.Value = new Bool(false);
+                                    _waiting = false;
+                                  
+                                    break;
+                                case 1:
+                                    funcCall.StringValue = "\"MovePhoto\"";
+                                    controllerWaiting.Value = new Bool(false);
+                                    _waiting = false;
+                                    break;
+
+                                case 2:
+                                    PartOrbit();
+                                    break;
+                                case 99:
+                                    
+                                    break;
+                                default:
+                                    return;
+                            }
+
+ 
+                        }
+
+
+                        sequenceStep++; 
+                    }
+                    await gphoto.WaitSeconds(25);
+                }
+                gphoto.SFTP_Retrieve();
+            }
+            catch (System.InvalidOperationException ex)
+            {
+                MessageBox.Show("Mastership is held by another client." + ex.Message);
+                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Unexpected error occurred: " + ex.Message);
+                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
+            }
+
+
+        }
+        private async void PartOrbit()
+        {
+            try
+            {
+                
+                    while ((Bool)axis6Allowed.Value)
+                    {
+                        gphoto.CaptureAndDownload();
+                        await gphoto.WaitSeconds(25);
+                        using (m = Mastership.Request(controller.Rapid))
+                        {
+                            funcCall.StringValue = "\"Axis_6_RotatePart\"";
+                            controllerWaiting.Value = new Bool(false);
+                            _waiting = false;
+
+                        }
+                    }
+                    using (m = Mastership.Request(controller.Rapid))
+                    {
+                        funcCall.StringValue = "\"MoveWrist2\"";
+                        controllerWaiting.Value = new Bool(false);
+                        _waiting = false;
+                        axis6Allowed.Value = new Bool(true);
+                        await gphoto.WaitSeconds(1500);
+                    }
+                    while ((Bool)axis6Allowed.Value)
+                    {
+                        gphoto.CaptureAndDownload();
+                        await gphoto.WaitSeconds(25);
+                        using (m = Mastership.Request(controller.Rapid))
+                        {
+                            funcCall.StringValue = "\"Axis_6_RotatePart\"";
+                            controllerWaiting.Value = new Bool(false);
+                            _waiting = false;
+
+                        }
+                    
+                    }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Unexpected error occurred: " + ex.Message);
+                fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
+            }
+        }
+
+            // Event Handlers
+            private void ProgramPointer_Changed(object sender, ProgramPositionEventArgs e)
         {
             //The Below Line Logs the program pointer row for debugging
             //fr.LogMessage(tasks[0].ProgramPointer.Range.Begin.Row.ToString());
-            Bool _waiting = (Bool)controllerWaiting.Value;
+            _waiting = (Bool)controllerWaiting.Value;
             if (tasks[0].ProgramPointer.Routine == "ControllerWait" && _waiting == true )
             {
                 fr.LogMessage("Waiting");
@@ -208,7 +333,7 @@ namespace Photogrametry
 
         private void ControllerWaitCheck(object sender,DataValueChangedEventArgs e)
         {
-            Bool _waiting = (Bool)controllerWaiting.Value;
+            _waiting = (Bool)controllerWaiting.Value;
             if (_waiting == true)
             {
 

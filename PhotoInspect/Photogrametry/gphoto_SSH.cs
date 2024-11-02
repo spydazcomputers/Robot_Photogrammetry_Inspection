@@ -83,7 +83,7 @@ namespace Photogrametry
                 fr.LogMessage(ex.Message + ex.Source + ex.StackTrace);
             }
         }
-        static async Task WaitSeconds(int milliseconds)
+        public async Task WaitSeconds(int milliseconds)
         {
             await Task.Delay(milliseconds);
         }
@@ -127,7 +127,7 @@ namespace Photogrametry
             SSHWrite($"gphoto2 --force-overwrite --get-file {startfiles + 1}-{startfiles + fr.i_Frames}");
             //Thread.Sleep(5000);
             //Add SFTP code here to download the files to the local computer and delete from PI
-            SFTP_Retrieve();
+            //SFTP_Retrieve();
         }
 
         // This Function connects to the Pi
@@ -257,7 +257,7 @@ namespace Photogrametry
         }   
 
 
-        private void SFTP_Retrieve()
+        public void SFTP_Retrieve()
         {
             Thread myThread = new System.Threading.Thread(delegate () {
                 

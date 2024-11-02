@@ -271,7 +271,7 @@ namespace Photogrametry
 
         private void btn_RapContinue_Click(object sender, EventArgs e)
         {
-            Rap.Continue();
+            Rap.PhotoSequence();
         }
 
         private void lbl_WSLStatus_Click(object sender, EventArgs e)
