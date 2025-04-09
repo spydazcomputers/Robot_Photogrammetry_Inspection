@@ -280,7 +280,11 @@ namespace Photogrametry
                 
                     while ((Bool)axis6Allowed.Value)
                     {
+                    if (gphoto.subRunning)
+                    {
                         gphoto.CaptureAndDownload();
+                    }
+                  
                         await gphoto.WaitSeconds(25);
                         using (m = Mastership.Request(controller.Rapid))
                         {
@@ -300,8 +304,11 @@ namespace Photogrametry
                     }
                     while ((Bool)axis6Allowed.Value)
                     {
+                    if (gphoto.subRunning)
+                    {
                         gphoto.CaptureAndDownload();
-                        await gphoto.WaitSeconds(25);
+                    }
+                    await gphoto.WaitSeconds(25);
                         using (m = Mastership.Request(controller.Rapid))
                         {
                             funcCall.StringValue = "\"Axis_6_RotatePart\"";
